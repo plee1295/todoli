@@ -7,16 +7,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/plee1295/todoli/types"
 	"github.com/plee1295/todoli/utils"
 	"github.com/spf13/cobra"
 )
-
-type Project struct {
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Tasks       []Task    `json:"tasks"`
-	CreatedAt   time.Time `json:"created_at"`
-}
 
 var addProjectCmd = &cobra.Command{
 	Use:   "project",
@@ -38,8 +32,8 @@ func init() {
 }
 
 func addProject(cmd *cobra.Command, args []string) {
-	project := Project{
-		Tasks:     []Task{},
+	project := types.Project{
+		Tasks:     []types.Task{},
 		CreatedAt: time.Now(),
 	}
 
@@ -51,7 +45,7 @@ func addProject(cmd *cobra.Command, args []string) {
 	project.Description, _ = utils.ReadInput("Please enter a project description", "")
 
 	// Load existing projects
-	var projects []Project
+	var projects []types.Project
 	if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
 		fmt.Println("Error loading projects:", err)
 		return
@@ -71,14 +65,14 @@ func addProject(cmd *cobra.Command, args []string) {
 
 func deleteProject(cmd *cobra.Command, args []string) {
 	// Load existing projects
-	var projects []Project
+	var projects []types.Project
 	if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
 		fmt.Println("Error loading projects:", err)
 		return
 	}
 
 	// Find the project to delete
-	var project Project
+	var project types.Project
 	for i, t := range projects {
 		if t.Name == args[0] {
 			project = t

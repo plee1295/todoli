@@ -7,21 +7,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/plee1295/todoli/types"
 	"github.com/plee1295/todoli/utils"
 	"github.com/spf13/cobra"
 )
-
-type Task struct {
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Project     string    `json:"project"`
-	Status      string    `json:"status"`
-	Priority    int       `json:"priority"`
-	Labels      []string  `json:"labels"`
-	CreatedAt   time.Time `json:"created_at"`
-	DueAt       time.Time `json:"due_at"`
-	CompletedAt time.Time `json:"completed_at"`
-}
 
 var addTaskCmd = &cobra.Command{
 	Use:   "task",
@@ -45,7 +34,7 @@ func init() {
 }
 
 func addTask(cmd *cobra.Command, args []string) {
-	task := Task{
+	task := types.Task{
 		CreatedAt: time.Now(),
 	}
 
@@ -61,7 +50,7 @@ func addTask(cmd *cobra.Command, args []string) {
 	task.Description, _ = utils.ReadInput("Please enter a task description", "")
 
 	// Load existing tasks
-	var tasks []Task
+	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
 		fmt.Println("Error loading tasks:", err)
 		return
@@ -81,14 +70,14 @@ func addTask(cmd *cobra.Command, args []string) {
 
 func deleteTask(cmd *cobra.Command, args []string) {
 	// Load existing tasks
-	var tasks []Task
+	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
 		fmt.Println("Error loading tasks:", err)
 		return
 	}
 
 	// Find the task to delete
-	var task Task
+	var task types.Task
 	for i, t := range tasks {
 		if t.Name == args[0] {
 			task = t
