@@ -26,3 +26,8 @@ go.work.sum
 
 # Log files
 *.json
+
+# Development files
+.vscode/
+.DS_Store
+.idea/
