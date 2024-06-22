@@ -18,15 +18,23 @@ type Project struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-var projectCmd = &cobra.Command{
+var addProjectCmd = &cobra.Command{
 	Use:   "project",
 	Short: "Add a new project",
 	Long:  "Add a new project to the list of projects.",
 	Run:   addProject,
 }
 
+var deleteProjectCmd = &cobra.Command{
+	Use:   "project",
+	Short: "Delete a project",
+	Long:  "Delete a project from the list of projects.",
+	Run:   deleteProject,
+}
+
 func init() {
-	addCmd.AddCommand(projectCmd)
+	addCmd.AddCommand(addProjectCmd)
+	deleteCmd.AddCommand(deleteProjectCmd)
 }
 
 func addProject(cmd *cobra.Command, args []string) {
@@ -59,4 +67,31 @@ func addProject(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println("\nProject successfully added!", project)
+}
+
+func deleteProject(cmd *cobra.Command, args []string) {
+	// Load existing projects
+	var projects []Project
+	if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+		fmt.Println("Error loading projects:", err)
+		return
+	}
+
+	// Find the project to delete
+	var project Project
+	for i, t := range projects {
+		if t.Name == args[0] {
+			project = t
+			projects = append(projects[:i], projects[i+1:]...)
+			break
+		}
+	}
+
+	// Save the updated list of projects
+	if err := utils.WriteToJSON(".projects.json", projects); err != nil {
+		fmt.Println("Error saving projects:", err)
+		return
+	}
+
+	fmt.Println("\nProject successfully deleted!", project)
 }

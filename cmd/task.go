@@ -23,17 +23,25 @@ type Task struct {
 	CompletedAt time.Time `json:"completed_at"`
 }
 
-var taskCmd = &cobra.Command{
+var addTaskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "Add a new task",
 	Long:  "Add a new task to the list of tasks.",
 	Run:   addTask,
 }
 
-func init() {
-	addCmd.AddCommand(taskCmd)
+var deleteTaskCmd = &cobra.Command{
+	Use:   "task",
+	Short: "Delete a task",
+	Long:  "Delete a task from the list of tasks.",
+	Run:   deleteTask,
+}
 
-	taskCmd.Flags().StringP("project", "p", "", "Project name")
+func init() {
+	addCmd.AddCommand(addTaskCmd)
+	addTaskCmd.Flags().StringP("project", "p", "", "Project name")
+
+	deleteCmd.AddCommand(deleteTaskCmd)
 }
 
 func addTask(cmd *cobra.Command, args []string) {
@@ -69,4 +77,31 @@ func addTask(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println("\nTask successfully added!", task)
+}
+
+func deleteTask(cmd *cobra.Command, args []string) {
+	// Load existing tasks
+	var tasks []Task
+	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
+		fmt.Println("Error loading tasks:", err)
+		return
+	}
+
+	// Find the task to delete
+	var task Task
+	for i, t := range tasks {
+		if t.Name == args[0] {
+			task = t
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			break
+		}
+	}
+
+	// Save the updated list of tasks
+	if err := utils.WriteToJSON(".tasks.json", tasks); err != nil {
+		fmt.Println("Error saving tasks:", err)
+		return
+	}
+
+	fmt.Println("\nTask successfully deleted!", task)
 }
