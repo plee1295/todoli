@@ -1,14 +1,21 @@
 package types
 
-import "time"
+import (
+	"time"
 
-const ()
+	"github.com/spf13/cobra"
+)
+
+type Commands struct {
+	Add    *cobra.Command
+	Delete *cobra.Command
+	List   *cobra.Command
+}
 
 type Project struct {
 	ID          int       `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	Tasks       []Task    `json:"tasks"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 

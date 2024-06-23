@@ -13,34 +13,33 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var addTaskCmd = &cobra.Command{
-	Use:   "task",
-	Short: "Add a new task",
-	Long:  "Add a new task to the list of tasks.",
-	Run:   addTask,
-}
-
-var deleteTaskCmd = &cobra.Command{
-	Use:   "task",
-	Short: "Delete a task",
-	Long:  "Delete a task from the list of tasks.",
-	Run:   deleteTask,
-}
-
-var listTaskCmd = &cobra.Command{
-	Use:   "tasks",
-	Short: "List tasks",
-	Long:  "List all tasks.",
-	Run:   listTasks,
-}
-
 func init() {
-	addCmd.AddCommand(addTaskCmd)
-	addTaskCmd.Flags().StringP("project", "p", "", "Project name")
+	commands := &types.Commands{
+		Add: &cobra.Command{
+			Use:   "task",
+			Short: "Add a new task",
+			Long:  "Add a new task to the list of tasks.",
+			Run:   addTask,
+		},
+		Delete: &cobra.Command{
+			Use:   "task",
+			Short: "Delete a task",
+			Long:  "Delete a task from the list of tasks.",
+			Run:   deleteTask,
+		},
+		List: &cobra.Command{
+			Use:   "tasks",
+			Short: "List tasks",
+			Long:  "List all tasks.",
+			Run:   listTasks,
+		},
+	}
 
-	deleteCmd.AddCommand(deleteTaskCmd)
-
-	listCmd.AddCommand(listTaskCmd)
+	addCmd.AddCommand(commands.Add)
+	commands.Add.Flags().StringP("project", "p", "", "Project name")
+	
+	deleteCmd.AddCommand(commands.Delete)
+	listCmd.AddCommand(commands.List)
 }
 
 func addTask(cmd *cobra.Command, args []string) {

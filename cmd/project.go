@@ -13,36 +13,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var addProjectCmd = &cobra.Command{
-	Use:   "project",
-	Short: "Add a new project",
-	Long:  "Add a new project to the list of projects.",
-	Run:   addProject,
-}
-
-var deleteProjectCmd = &cobra.Command{
-	Use:   "project",
-	Short: "Delete a project",
-	Long:  "Delete a project from the list of projects.",
-	Run:   deleteProject,
-}
-
-var listProjectCmd = &cobra.Command{
-	Use:   "projects",
-	Short: "List projects",
-	Long:  "List all projects.",
-	Run:   listProjects,
-}
-
 func init() {
-	addCmd.AddCommand(addProjectCmd)
-	deleteCmd.AddCommand(deleteProjectCmd)
-	listCmd.AddCommand(listProjectCmd)
+	commands := &types.Commands{
+		Add: &cobra.Command{
+			Use:   "project",
+			Short: "Add a new project",
+			Long:  "Add a new project to the list of projects.",
+			Run:   addProject,
+		},
+		Delete: &cobra.Command{
+			Use:   "project",
+			Short: "Delete a project",
+			Long:  "Delete a project from the list of projects.",
+			Run:   deleteProject,
+		},
+		List: &cobra.Command{
+			Use:   "projects",
+			Short: "List projects",
+			Long:  "List all projects.",
+			Run:   listProjects,
+		},
+	}
+
+	addCmd.AddCommand(commands.Add)
+	deleteCmd.AddCommand(commands.Delete)
+	listCmd.AddCommand(commands.List)
 }
 
 func addProject(cmd *cobra.Command, args []string) {
 	project := types.Project{
-		Tasks:     []types.Task{},
 		CreatedAt: time.Now(),
 	}
 
