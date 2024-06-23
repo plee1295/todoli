@@ -28,7 +28,7 @@ var deleteProjectCmd = &cobra.Command{
 }
 
 var listProjectCmd = &cobra.Command{
-	Use:   "project",
+	Use:   "projects",
 	Short: "List projects",
 	Long:  "List all projects.",
 	Run:   listProjects,

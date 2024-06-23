@@ -28,7 +28,7 @@ var deleteTaskCmd = &cobra.Command{
 }
 
 var listTaskCmd = &cobra.Command{
-	Use:   "task",
+	Use:   "tasks",
 	Short: "List tasks",
 	Long:  "List all tasks.",
 	Run:   listTasks,
