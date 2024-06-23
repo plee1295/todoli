@@ -65,13 +65,13 @@ func ReadInput(prompt string, defaultValue string) (string, error) {
 
 func ReadMultipleChoice(prompt string, choices []string) (string, error) {
 	promptuiSelect := promptui.Select{
-			Label: prompt,
-			Items: choices,
+		Label: prompt,
+		Items: choices,
 	}
 
 	_, result, err := promptuiSelect.Run()
 	if err != nil {
-			return "", err
+		return "", err
 	}
 
 	return result, nil

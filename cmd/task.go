@@ -100,6 +100,40 @@ func addTask(cmd *cobra.Command, args []string) {
 		task.Priority = types.Low
 	}
 
+	// TODO: Allow for multiple labels to be selected
+	var labels []types.Label
+	if err := utils.ReadFromJSON(".labels.json", &labels); err != nil {
+		fmt.Println("Error loading labels:", err)
+		return
+	}
+
+	var labelStrings []string
+	for _, label := range labels {
+		labelStrings = append(labelStrings, label.String())
+	}
+	
+	labelChoice, _ := utils.ReadMultipleChoice("Task labels", labelStrings)
+	task.Labels = append(task.Labels, types.Label(labelChoice))
+
+	var projects []types.Project
+	if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+		fmt.Println("Error loading projects:", err)
+		return
+	}
+
+	var projectStrings []string
+	for _, project := range projects {
+		projectStrings = append(projectStrings, project.String())
+	}
+
+	projectChoice, _ := utils.ReadMultipleChoice("Task project", projectStrings)
+	for _, project := range projects {
+		if project.String() == projectChoice {
+			task.ProjectID = project.ID
+			break
+		}
+	}
+
 	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
 		fmt.Println("Error loading tasks:", err)

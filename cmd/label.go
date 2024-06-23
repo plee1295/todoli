@@ -27,10 +27,10 @@ func init() {
 }
 
 func addLabel(cmd *cobra.Command, args []string) {
-	label := types.Label{}
+	var label types.Label
 
 	if len(args) == 1 {
-		label.Name = args[0]
+		label = types.Label(args[0])
 	}
 
 	var labels []types.Label

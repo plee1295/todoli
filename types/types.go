@@ -12,8 +12,10 @@ type Commands struct {
 	List   *cobra.Command
 }
 
-type Label struct {
-	Name string `json:"name"`
+type Label string
+
+func (l Label) String() string {
+	return string(l)
 }
 
 type Project struct {
@@ -21,6 +23,10 @@ type Project struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
+}
+
+func (p Project) String() string {
+	return string(p.Name)
 }
 
 type Task struct {
@@ -31,7 +37,7 @@ type Task struct {
 	ParentID    string    `json:"parent_id"`
 	Status      Status    `json:"status"`
 	Priority    Priority  `json:"priority"`
-	Labels      []string  `json:"labels"`
+	Labels      []Label   `json:"labels"`
 	CreatedAt   time.Time `json:"created_at"`
 	DueAt       time.Time `json:"due_at"`
 	CompletedAt time.Time `json:"completed_at"`
