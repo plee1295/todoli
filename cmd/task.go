@@ -54,7 +54,18 @@ func addTask(cmd *cobra.Command, args []string) {
 	}
 
 	if project, _ := cmd.Flags().GetString("project"); project != "" {
-		task.Project = project
+		var projects []types.Project
+		if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+			fmt.Println("Error loading projects:", err)
+			return
+		}
+
+		for _, p := range projects {
+			if p.Name == project {
+				task.ProjectID = p.ID
+				break
+			}
+		}
 	}
 
 	task.Name, _ = utils.ReadInput("Please enter a task name", task.Name)
@@ -116,6 +127,7 @@ func listTasks(cmd *cobra.Command, args []string) {
 			{Align: simpletable.AlignCenter, Text: "ID"},
 			{Align: simpletable.AlignCenter, Text: "Name"},
 			{Align: simpletable.AlignCenter, Text: "Status"},
+			{Align: simpletable.AlignCenter, Text: "Project"},
 			{Align: simpletable.AlignRight, Text: "CreatedAt"},
 		},
 	}
@@ -134,8 +146,8 @@ func listTasks(cmd *cobra.Command, args []string) {
 
 		switch {
 		case item.Status == types.Open:
-			name = utils.Gray(item.Name)
-			status = utils.Gray("Open")
+			name = item.Name
+			status = "Open"
 		case item.Status == types.InProgress:
 			name = utils.Blue(item.Name)
 			status = utils.Blue("In Progress")
@@ -144,10 +156,25 @@ func listTasks(cmd *cobra.Command, args []string) {
 			status = utils.Green("Completed")
 		}
 
+		var projects []types.Project
+		if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+			fmt.Println("Error loading projects:", err)
+			return
+		}
+
+		projectName := "None"
+		for _, p := range projects {
+			if p.ID == item.ProjectID {
+				projectName = p.Name
+				break
+			}
+		}
+
 		cells = append(cells, []*simpletable.Cell{
 			{Text: fmt.Sprintf("%d", item.ID)},
 			{Text: name},
 			{Text: status},
+			{Text: projectName},
 			{Text: item.CreatedAt.Format(time.RFC822)},
 		})
 	}
@@ -155,7 +182,7 @@ func listTasks(cmd *cobra.Command, args []string) {
 	table.Body = &simpletable.Body{Cells: cells}
 
 	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
-		{Align: simpletable.AlignCenter, Span: 4, Text: fmt.Sprintf("Total: %d", len(tasks))},
+		{Align: simpletable.AlignCenter, Span: 5, Text: fmt.Sprintf("Total: %d", len(tasks))},
 	}}
 
 	table.SetStyle(simpletable.StyleUnicode)
