@@ -75,8 +75,30 @@ func addTask(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	task.Name, _ = utils.ReadInput("Please enter a task name", task.Name)
-	task.Description, _ = utils.ReadInput("Please enter a task description", "")
+	task.Name, _ = utils.ReadInput("Task name", task.Name)
+	task.Description, _ = utils.ReadInput("Task description", "")
+
+	statusChoice, _ := utils.ReadMultipleChoice("Task status", []string{"Open", "In Progress", "Completed"})
+	switch statusChoice {
+	case "Open":
+		task.Status = types.Open
+	case "In Progress":
+		task.Status = types.InProgress
+	case "Completed":
+		task.Status = types.Completed
+	}
+
+	priorityChoice, _ := utils.ReadMultipleChoice("Task priority", []string{"Critical", "High", "Medium", "Low"})
+	switch priorityChoice {
+	case "Critical":
+		task.Priority = types.Critical
+	case "High":
+		task.Priority = types.High
+	case "Medium":
+		task.Priority = types.Medium
+	case "Low":
+		task.Priority = types.Low
+	}
 
 	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {

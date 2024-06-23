@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 )
 
 // ReadFromJSON reads data from a JSON file and unmarshals it into the provided target.
@@ -59,4 +61,18 @@ func ReadInput(prompt string, defaultValue string) (string, error) {
 		return defaultValue, nil
 	}
 	return input, nil
+}
+
+func ReadMultipleChoice(prompt string, choices []string) (string, error) {
+	promptuiSelect := promptui.Select{
+			Label: prompt,
+			Items: choices,
+	}
+
+	_, result, err := promptuiSelect.Run()
+	if err != nil {
+			return "", err
+	}
+
+	return result, nil
 }

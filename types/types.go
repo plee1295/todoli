@@ -24,9 +24,9 @@ type Task struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	ProjectID   string    `json:"project_id"`
-	ParentID    int       `json:"parent_id"`
+	ParentID    string    `json:"parent_id"`
 	Status      Status    `json:"status"`
-	Priority    int       `json:"priority"`
+	Priority    Priority  `json:"priority"`
 	Labels      []string  `json:"labels"`
 	CreatedAt   time.Time `json:"created_at"`
 	DueAt       time.Time `json:"due_at"`
@@ -41,6 +41,11 @@ const (
 
 type Status int
 
-func (s Status) StatusIndex() int {
-	return int(s)
-}
+const (
+	Critical Priority = iota + 1
+	High
+	Medium
+	Low
+)
+
+type Priority int
