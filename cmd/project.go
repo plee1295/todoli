@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/alexeyco/simpletable"
 	"github.com/plee1295/todoli/types"
 	"github.com/plee1295/todoli/utils"
 	"github.com/spf13/cobra"
@@ -26,9 +27,17 @@ var deleteProjectCmd = &cobra.Command{
 	Run:   deleteProject,
 }
 
+var listProjectCmd = &cobra.Command{
+	Use:   "project",
+	Short: "List projects",
+	Long:  "List all projects.",
+	Run:   listProjects,
+}
+
 func init() {
 	addCmd.AddCommand(addProjectCmd)
 	deleteCmd.AddCommand(deleteProjectCmd)
+	listCmd.AddCommand(listProjectCmd)
 }
 
 func addProject(cmd *cobra.Command, args []string) {
@@ -51,10 +60,10 @@ func addProject(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	project.ID = len(projects) + 1
+
 	// Append the new project
 	projects = append(projects, project)
-
-	project.ID = len(projects)
 
 	// Save the updated list of projects
 	if err := utils.WriteToJSON(".projects.json", projects); err != nil {
@@ -90,4 +99,42 @@ func deleteProject(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println("\nProject successfully deleted!", project)
+}
+
+func listProjects(cmd *cobra.Command, args []string) {
+	table := simpletable.New()
+
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "ID"},
+			{Align: simpletable.AlignCenter, Text: "Name"},
+			{Align: simpletable.AlignRight, Text: "CreatedAt"},
+		},
+	}
+
+	var cells [][]*simpletable.Cell
+
+	var projects []types.Task
+	if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+		fmt.Println("Error loading projects:", err)
+		return
+	}
+
+	for _, project := range projects {
+		cells = append(cells, []*simpletable.Cell{
+			{Text: fmt.Sprintf("%d", project.ID)},
+			{Text: project.Name},
+			{Text: project.CreatedAt.Format(time.RFC822)},
+		})
+	}
+
+	table.Body = &simpletable.Body{Cells: cells}
+
+	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
+		{Align: simpletable.AlignRight, Span: 3, Text: fmt.Sprintf("Total: %d", len(projects))},
+	}}
+
+	table.SetStyle(simpletable.StyleUnicode)
+
+	table.Println()
 }

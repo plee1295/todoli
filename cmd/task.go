@@ -140,19 +140,19 @@ func listTasks(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	for _, item := range tasks {
-		name := utils.Blue(item.Name)
+	for _, task := range tasks {
+		name := utils.Blue(task.Name)
 		status := utils.Blue("no")
 
 		switch {
-		case item.Status == types.Open:
-			name = item.Name
+		case task.Status == types.Open:
+			name = task.Name
 			status = "Open"
-		case item.Status == types.InProgress:
-			name = utils.Blue(item.Name)
+		case task.Status == types.InProgress:
+			name = utils.Blue(task.Name)
 			status = utils.Blue("In Progress")
-		case item.Status == types.Completed:
-			name = utils.Green(fmt.Sprintf("%s ✓", item.Name))
+		case task.Status == types.Completed:
+			name = utils.Green(fmt.Sprintf("%s ✓", task.Name))
 			status = utils.Green("Completed")
 		}
 
@@ -164,25 +164,25 @@ func listTasks(cmd *cobra.Command, args []string) {
 
 		projectName := "None"
 		for _, p := range projects {
-			if p.ID == item.ProjectID {
+			if p.ID == task.ProjectID {
 				projectName = p.Name
 				break
 			}
 		}
 
 		cells = append(cells, []*simpletable.Cell{
-			{Text: fmt.Sprintf("%d", item.ID)},
+			{Text: fmt.Sprintf("%d", task.ID)},
 			{Text: name},
 			{Text: status},
 			{Text: projectName},
-			{Text: item.CreatedAt.Format(time.RFC822)},
+			{Text: task.CreatedAt.Format(time.RFC822)},
 		})
 	}
 
 	table.Body = &simpletable.Body{Cells: cells}
 
 	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
-		{Align: simpletable.AlignCenter, Span: 5, Text: fmt.Sprintf("Total: %d", len(tasks))},
+		{Align: simpletable.AlignRight, Span: 5, Text: fmt.Sprintf("Total: %d", len(tasks))},
 	}}
 
 	table.SetStyle(simpletable.StyleUnicode)
