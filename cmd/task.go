@@ -37,7 +37,7 @@ func init() {
 
 	addCmd.AddCommand(commands.Add)
 	commands.Add.Flags().StringP("project", "p", "", "Project name")
-	
+
 	deleteCmd.AddCommand(commands.Delete)
 	listCmd.AddCommand(commands.List)
 }
@@ -47,6 +47,14 @@ func addTask(cmd *cobra.Command, args []string) {
 		Status:    types.Open,
 		CreatedAt: time.Now(),
 	}
+
+	id, err := utils.GenerateID()
+	if err != nil {
+		fmt.Println("Error generating ID:", err)
+		return
+	}
+
+	task.ID = id
 
 	if len(args) == 1 {
 		task.Name = args[0]
@@ -70,19 +78,14 @@ func addTask(cmd *cobra.Command, args []string) {
 	task.Name, _ = utils.ReadInput("Please enter a task name", task.Name)
 	task.Description, _ = utils.ReadInput("Please enter a task description", "")
 
-	// Load existing tasks
 	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
 		fmt.Println("Error loading tasks:", err)
 		return
 	}
 
-	task.ID = len(tasks) + 1
-
-	// Append the new task
 	tasks = append(tasks, task)
 
-	// Save the updated list of tasks
 	if err := utils.WriteToJSON(".tasks.json", tasks); err != nil {
 		fmt.Println("Error saving tasks:", err)
 		return
@@ -92,14 +95,12 @@ func addTask(cmd *cobra.Command, args []string) {
 }
 
 func deleteTask(cmd *cobra.Command, args []string) {
-	// Load existing tasks
 	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
 		fmt.Println("Error loading tasks:", err)
 		return
 	}
 
-	// Find the task to delete
 	var task types.Task
 	for i, t := range tasks {
 		if t.Name == args[0] {
@@ -109,7 +110,6 @@ func deleteTask(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	// Save the updated list of tasks
 	if err := utils.WriteToJSON(".tasks.json", tasks); err != nil {
 		fmt.Println("Error saving tasks:", err)
 		return
@@ -170,7 +170,7 @@ func listTasks(cmd *cobra.Command, args []string) {
 		}
 
 		cells = append(cells, []*simpletable.Cell{
-			{Text: fmt.Sprintf("%d", task.ID)},
+			{Text: task.ID},
 			{Text: name},
 			{Text: status},
 			{Text: projectName},

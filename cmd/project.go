@@ -45,6 +45,14 @@ func addProject(cmd *cobra.Command, args []string) {
 		CreatedAt: time.Now(),
 	}
 
+	id, err := utils.GenerateID()
+	if err != nil {
+		fmt.Println("Error generating ID:", err)
+		return
+	}
+
+	project.ID = id
+
 	if len(args) == 1 {
 		project.Name = args[0]
 	}
@@ -58,8 +66,6 @@ func addProject(cmd *cobra.Command, args []string) {
 		fmt.Println("Error loading projects:", err)
 		return
 	}
-
-	project.ID = len(projects) + 1
 
 	// Append the new project
 	projects = append(projects, project)
@@ -121,7 +127,7 @@ func listProjects(cmd *cobra.Command, args []string) {
 
 	for _, project := range projects {
 		cells = append(cells, []*simpletable.Cell{
-			{Text: fmt.Sprintf("%d", project.ID)},
+			{Text: project.ID},
 			{Text: project.Name},
 			{Text: project.CreatedAt.Format(time.RFC822)},
 		})
