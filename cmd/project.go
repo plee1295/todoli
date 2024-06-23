@@ -54,13 +54,15 @@ func addProject(cmd *cobra.Command, args []string) {
 	// Append the new project
 	projects = append(projects, project)
 
+	project.ID = len(projects)
+
 	// Save the updated list of projects
 	if err := utils.WriteToJSON(".projects.json", projects); err != nil {
 		fmt.Println("Error saving projects:", err)
 		return
 	}
 
-	fmt.Println("\nProject successfully added!", project)
+	fmt.Println("\nProject successfully added!")
 }
 
 func deleteProject(cmd *cobra.Command, args []string) {

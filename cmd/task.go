@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/alexeyco/simpletable"
 	"github.com/plee1295/todoli/types"
 	"github.com/plee1295/todoli/utils"
 	"github.com/spf13/cobra"
@@ -26,15 +27,25 @@ var deleteTaskCmd = &cobra.Command{
 	Run:   deleteTask,
 }
 
+var listTaskCmd = &cobra.Command{
+	Use:   "task",
+	Short: "List tasks",
+	Long:  "List all tasks.",
+	Run:   listTasks,
+}
+
 func init() {
 	addCmd.AddCommand(addTaskCmd)
 	addTaskCmd.Flags().StringP("project", "p", "", "Project name")
 
 	deleteCmd.AddCommand(deleteTaskCmd)
+
+	listCmd.AddCommand(listTaskCmd)
 }
 
 func addTask(cmd *cobra.Command, args []string) {
 	task := types.Task{
+		Status:    types.Open,
 		CreatedAt: time.Now(),
 	}
 
@@ -56,6 +67,8 @@ func addTask(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	task.ID = len(tasks) + 1
+
 	// Append the new task
 	tasks = append(tasks, task)
 
@@ -65,7 +78,7 @@ func addTask(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Println("\nTask successfully added!", task)
+	fmt.Println("\nTask successfully added!")
 }
 
 func deleteTask(cmd *cobra.Command, args []string) {
@@ -93,4 +106,59 @@ func deleteTask(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println("\nTask successfully deleted!", task)
+}
+
+func listTasks(cmd *cobra.Command, args []string) {
+	table := simpletable.New()
+
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "ID"},
+			{Align: simpletable.AlignCenter, Text: "Name"},
+			{Align: simpletable.AlignCenter, Text: "Status"},
+			{Align: simpletable.AlignRight, Text: "CreatedAt"},
+		},
+	}
+
+	var cells [][]*simpletable.Cell
+
+	var tasks []types.Task
+	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
+		fmt.Println("Error loading tasks:", err)
+		return
+	}
+
+	for _, item := range tasks {
+		name := utils.Blue(item.Name)
+		status := utils.Blue("no")
+
+		switch {
+		case item.Status == types.Open:
+			name = utils.Gray(item.Name)
+			status = utils.Gray("Open")
+		case item.Status == types.InProgress:
+			name = utils.Blue(item.Name)
+			status = utils.Blue("In Progress")
+		case item.Status == types.Completed:
+			name = utils.Green(fmt.Sprintf("%s ✓", item.Name))
+			status = utils.Green("Completed")
+		}
+
+		cells = append(cells, []*simpletable.Cell{
+			{Text: fmt.Sprintf("%d", item.ID)},
+			{Text: name},
+			{Text: status},
+			{Text: item.CreatedAt.Format(time.RFC822)},
+		})
+	}
+
+	table.Body = &simpletable.Body{Cells: cells}
+
+	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
+		{Align: simpletable.AlignCenter, Span: 4, Text: fmt.Sprintf("Total: %d", len(tasks))},
+	}}
+
+	table.SetStyle(simpletable.StyleUnicode)
+
+	table.Println()
 }
