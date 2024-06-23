@@ -12,6 +12,10 @@ type Commands struct {
 	List   *cobra.Command
 }
 
+type Label struct {
+	Name string `json:"name"`
+}
+
 type Project struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
