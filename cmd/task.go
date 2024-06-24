@@ -228,42 +228,44 @@ func listTasks(cmd *cobra.Command, args []string) {
 	}
 
 	for _, task := range tasks {
-		name := utils.Blue(task.Name)
-		status := utils.Blue("no")
+		if task.ParentID == "" {
+			name := utils.Blue(task.Name)
+			status := utils.Blue("no")
 
-		switch {
-		case task.Status == types.Open:
-			name = task.Name
-			status = "Open"
-		case task.Status == types.InProgress:
-			name = utils.Blue(task.Name)
-			status = utils.Blue("In Progress")
-		case task.Status == types.Completed:
-			name = utils.Green(fmt.Sprintf("%s ✓", task.Name))
-			status = utils.Green("Completed")
-		}
-
-		var projects []types.Project
-		if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
-			fmt.Println("Error loading projects:", err)
-			return
-		}
-
-		projectName := "None"
-		for _, p := range projects {
-			if p.ID == task.ProjectID {
-				projectName = p.Name
-				break
+			switch {
+			case task.Status == types.Open:
+				name = task.Name
+				status = "Open"
+			case task.Status == types.InProgress:
+				name = utils.Blue(task.Name)
+				status = utils.Blue("In Progress")
+			case task.Status == types.Completed:
+				name = utils.Green(fmt.Sprintf("%s ✓", task.Name))
+				status = utils.Green("Completed")
 			}
-		}
 
-		cells = append(cells, []*simpletable.Cell{
-			{Text: task.ID},
-			{Text: name},
-			{Text: status},
-			{Text: projectName},
-			{Text: task.CreatedAt.Format(time.RFC822)},
-		})
+			var projects []types.Project
+			if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+				fmt.Println("Error loading projects:", err)
+				return
+			}
+
+			projectName := "None"
+			for _, p := range projects {
+				if p.ID == task.ProjectID {
+					projectName = p.Name
+					break
+				}
+			}
+
+			cells = append(cells, []*simpletable.Cell{
+				{Text: task.ID},
+				{Text: name},
+				{Text: status},
+				{Text: projectName},
+				{Text: task.CreatedAt.Format(time.RFC822)},
+			})
+		}
 	}
 
 	table.Body = &simpletable.Body{Cells: cells}

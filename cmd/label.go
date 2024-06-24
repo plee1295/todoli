@@ -20,6 +20,7 @@ func init() {
 			Run:   addLabel,
 		},
 		Delete: nil,
+		View: nil,
 		List: nil,
 	}
 
