@@ -272,7 +272,7 @@ func listTasks(cmd *cobra.Command, args []string) {
 				return
 			}
 
-			projectName := "None"
+			projectName := "-"
 			for _, p := range projects {
 				if p.ID == task.ProjectID {
 					projectName = p.Name
