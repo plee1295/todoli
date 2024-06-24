@@ -27,6 +27,12 @@ func init() {
 			Long:  "Delete a project from the list of projects.",
 			Run:   deleteProject,
 		},
+		View: &cobra.Command{
+			Use:   "project",
+			Short: "View a project",
+			Long:  "View a project from the list of projects.",
+			Run:   viewProject,
+		},
 		List: &cobra.Command{
 			Use:   "projects",
 			Short: "List projects",
@@ -37,6 +43,7 @@ func init() {
 
 	addCmd.AddCommand(commands.Add)
 	deleteCmd.AddCommand(commands.Delete)
+	viewCmd.AddCommand(commands.View)
 	listCmd.AddCommand(commands.List)
 }
 
@@ -104,6 +111,27 @@ func deleteProject(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println("\nProject successfully deleted!", project)
+}
+
+func viewProject(cmd *cobra.Command, args []string) {
+	var projects []types.Project
+	if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+		fmt.Println("Error loading projects:", err)
+		return
+	}
+
+	var project types.Project
+	for _, t := range projects {
+		if t.ID == args[0] || t.Name == args[0] {
+			project = t
+			break
+		}
+	}
+
+	fmt.Println("ID:", project.ID)
+	fmt.Println("Name:", project.Name)
+	fmt.Println("Description:", project.Description)
+	fmt.Println("Created At:", project.CreatedAt.Format(time.RFC822))
 }
 
 func listProjects(cmd *cobra.Command, args []string) {
