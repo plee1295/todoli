@@ -157,7 +157,6 @@ func addTask(cmd *cobra.Command, args []string) {
 	fmt.Println("\nTask successfully added!")
 }
 
-// Todo - remove all subtasks when deleting a task
 func deleteTask(cmd *cobra.Command, args []string) {
 	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
@@ -165,12 +164,14 @@ func deleteTask(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	// Loop over tasks in reverse order to avoid index out of range errors
 	var task types.Task
-	for i, t := range tasks {
-		if t.Name == args[0] {
+	for i := len(tasks) - 1; i >= 0; i-- {
+		t := tasks[i]
+		// Remove task and all subtasks
+		if t.ID == args[0] || t.ParentID == args[0] {
 			task = t
 			tasks = append(tasks[:i], tasks[i+1:]...)
-			break
 		}
 	}
 
