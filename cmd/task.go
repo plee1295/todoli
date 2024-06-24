@@ -27,6 +27,12 @@ func init() {
 			Long:  "Delete a task from the list of tasks.",
 			Run:   deleteTask,
 		},
+		Update: &cobra.Command{
+			Use:   "task",
+			Short: "Update a task",
+			Long:  "Update a task from the list of tasks.",
+			Run:   updateTask,
+		},
 		View: &cobra.Command{
 			Use:   "task",
 			Short: "View a task",
@@ -46,6 +52,7 @@ func init() {
 
 	viewCmd.AddCommand(commands.View)
 	deleteCmd.AddCommand(commands.Delete)
+	updateCmd.AddCommand(commands.Update)
 	listCmd.AddCommand(commands.List)
 }
 
@@ -181,6 +188,44 @@ func deleteTask(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println("\nTask successfully deleted!", task)
+}
+
+func updateTask(cmd *cobra.Command, args []string) {	
+	var tasks []types.Task
+	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
+		fmt.Println("Error loading tasks:", err)
+		return
+	}
+	
+	id := args[0]
+	var task types.Task
+	for _, t := range tasks {
+		if t.ID == id {
+			task = t
+		}
+	}
+
+	fmt.Println("Why property would you like to update?")
+	statusChoice, _ := utils.ReadMultipleChoice("Properties", []string{"Name", "Description"})
+	switch statusChoice {
+	case "Name":
+		task.Name, _ = utils.ReadInput("Task name", task.Name)
+	case "Description":
+		task.Description, _ = utils.ReadInput("Task description", task.Description)
+	}
+
+	for i, t := range tasks {
+		if t.ID == id {
+			tasks[i] = task
+		}
+	}
+
+	if err := utils.WriteToJSON(".tasks.json", tasks); err != nil {
+		fmt.Println("Error saving tasks:", err)
+		return
+	}
+
+	fmt.Println("\nTask successfully updated!")
 }
 
 func viewTask(cmd *cobra.Command, args []string) {
