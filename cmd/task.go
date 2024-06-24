@@ -216,6 +216,7 @@ func listTasks(cmd *cobra.Command, args []string) {
 			{Align: simpletable.AlignCenter, Text: "Status"},
 			{Align: simpletable.AlignCenter, Text: "Project"},
 			{Align: simpletable.AlignRight, Text: "CreatedAt"},
+			{Align: simpletable.AlignCenter, Text: "Subtasks"},
 		},
 	}
 
@@ -227,8 +228,29 @@ func listTasks(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	type SubtaskInfo struct {
+		Total     int
+		Completed int
+	}
+
+	subtaskCount := make(map[string]SubtaskInfo)
+	for _, task := range tasks {
+		if task.ParentID != "" {
+			info := subtaskCount[task.ParentID]
+			info.Total++
+			if task.Status == types.Completed {
+				info.Completed++
+			}
+			subtaskCount[task.ParentID] = info
+		} else {
+			subtaskCount[task.ID] = SubtaskInfo{Total: 0, Completed: 0}
+		}
+	}
+
+	parentTaskCount := 0
 	for _, task := range tasks {
 		if task.ParentID == "" {
+			parentTaskCount++
 			name := utils.Blue(task.Name)
 			status := utils.Blue("no")
 
@@ -258,12 +280,20 @@ func listTasks(cmd *cobra.Command, args []string) {
 				}
 			}
 
+			completed := subtaskCount[task.ID].Completed
+			total := subtaskCount[task.ID].Total
+			percent := 0
+			if total > 0 {
+				percent = int(float64(completed) / float64(total) * 100 + 0.5)
+			}
+
 			cells = append(cells, []*simpletable.Cell{
 				{Text: task.ID},
 				{Text: name},
 				{Text: status},
 				{Text: projectName},
 				{Text: task.CreatedAt.Format(time.RFC822)},
+				{Text: fmt.Sprintf("%d/%d (%d%%)", completed, total, percent)},
 			})
 		}
 	}
@@ -271,7 +301,7 @@ func listTasks(cmd *cobra.Command, args []string) {
 	table.Body = &simpletable.Body{Cells: cells}
 
 	table.Footer = &simpletable.Footer{Cells: []*simpletable.Cell{
-		{Align: simpletable.AlignRight, Span: 5, Text: fmt.Sprintf("Total: %d", len(tasks))},
+		{Align: simpletable.AlignRight, Span: 6, Text: fmt.Sprintf("Total: %d", parentTaskCount)},
 	}}
 
 	table.SetStyle(simpletable.StyleUnicode)
