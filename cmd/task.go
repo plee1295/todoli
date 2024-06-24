@@ -27,6 +27,12 @@ func init() {
 			Long:  "Delete a task from the list of tasks.",
 			Run:   deleteTask,
 		},
+		View: &cobra.Command{
+			Use:   "task",
+			Short: "View a task",
+			Long:  "View a task from the list of tasks.",
+			Run:   viewTask,
+		},
 		List: &cobra.Command{
 			Use:   "tasks",
 			Short: "List tasks",
@@ -38,6 +44,7 @@ func init() {
 	addCmd.AddCommand(commands.Add)
 	commands.Add.Flags().StringP("project", "p", "", "Project name")
 
+	viewCmd.AddCommand(commands.View)
 	deleteCmd.AddCommand(commands.Delete)
 	listCmd.AddCommand(commands.List)
 }
@@ -111,7 +118,7 @@ func addTask(cmd *cobra.Command, args []string) {
 	for _, label := range labels {
 		labelStrings = append(labelStrings, label.String())
 	}
-	
+
 	labelChoice, _ := utils.ReadMultipleChoice("Task labels", labelStrings)
 	task.Labels = append(task.Labels, types.Label(labelChoice))
 
@@ -172,6 +179,31 @@ func deleteTask(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Println("\nTask successfully deleted!", task)
+}
+
+func viewTask(cmd *cobra.Command, args []string) {
+	var tasks []types.Task
+	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
+		fmt.Println("Error loading tasks:", err)
+		return
+	}
+
+	for _, task := range tasks {
+		if task.ID == args[0] || task.Name == args[0] {
+			fmt.Println("ID:", task.ID)
+			fmt.Println("Name:", task.Name)
+			fmt.Println("Description:", task.Description)
+			fmt.Println("Project ID:", task.ProjectID)
+			fmt.Println("Parent ID:", task.ParentID)
+			fmt.Println("Status:", task.Status)
+			fmt.Println("Priority:", task.Priority)
+			fmt.Println("Labels:", task.Labels)
+			fmt.Println("Created At:", task.CreatedAt)
+			fmt.Println("Due At:", task.DueAt)
+			fmt.Println("Completed At:", task.CompletedAt)
+			return
+		}
+	}
 }
 
 func listTasks(cmd *cobra.Command, args []string) {

@@ -9,6 +9,7 @@ import (
 type Commands struct {
 	Add    *cobra.Command
 	Delete *cobra.Command
+	View   *cobra.Command
 	List   *cobra.Command
 }
 
