@@ -203,8 +203,12 @@ func viewTask(cmd *cobra.Command, args []string) {
 
 	var cells [][]*simpletable.Cell
 
+	taskFound := false
+
 	for _, task := range tasks {
 		if task.ID == args[0] {
+			taskFound = true
+
 			fmt.Println("ID:", task.ID)
 			fmt.Println("Name:", task.Name)
 			fmt.Println("Description:", task.Description)
@@ -226,6 +230,11 @@ func viewTask(cmd *cobra.Command, args []string) {
 				{Text: task.CreatedAt.Format(time.RFC822)},
 			})
 		}
+	}
+
+	if !taskFound {
+		fmt.Printf("Task with ID %s not found\n", args[0])
+		return
 	}
 
 	table.Body = &simpletable.Body{Cells: cells}
