@@ -323,13 +323,20 @@ func listTasks(cmd *cobra.Command, args []string) {
 				percent = int(float64(completed)/float64(total)*100 + 0.5)
 			}
 
+			var subtaskStr string
+			if total == 0 {
+				subtaskStr = "-"
+			} else {
+				subtaskStr = fmt.Sprintf("%d/%d (%d%%)", completed, total, percent)
+			}
+
 			cells = append(cells, []*simpletable.Cell{
 				{Text: task.ID},
 				{Text: name},
 				{Text: status},
 				{Text: projectName},
 				{Text: task.CreatedAt.Format(time.RFC822)},
-				{Text: fmt.Sprintf("%d/%d (%d%%)", completed, total, percent)},
+				{Text: subtaskStr},
 			})
 		}
 	}
