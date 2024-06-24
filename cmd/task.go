@@ -157,6 +157,7 @@ func addTask(cmd *cobra.Command, args []string) {
 	fmt.Println("\nTask successfully added!")
 }
 
+// Todo - remove all subtasks when deleting a task
 func deleteTask(cmd *cobra.Command, args []string) {
 	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
@@ -188,8 +189,21 @@ func viewTask(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	table := simpletable.New()
+
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "ID"},
+			{Align: simpletable.AlignCenter, Text: "Subtask"},
+			{Align: simpletable.AlignCenter, Text: "Status"},
+			{Align: simpletable.AlignRight, Text: "CreatedAt"},
+		},
+	}
+
+	var cells [][]*simpletable.Cell
+
 	for _, task := range tasks {
-		if task.ID == args[0] || task.Name == args[0] {
+		if task.ID == args[0] {
 			fmt.Println("ID:", task.ID)
 			fmt.Println("Name:", task.Name)
 			fmt.Println("Description:", task.Description)
@@ -201,9 +215,21 @@ func viewTask(cmd *cobra.Command, args []string) {
 			fmt.Println("Created At:", task.CreatedAt)
 			fmt.Println("Due At:", task.DueAt)
 			fmt.Println("Completed At:", task.CompletedAt)
-			return
+		}
+
+		if task.ParentID == args[0] {
+			cells = append(cells, []*simpletable.Cell{
+				{Text: task.ID},
+				{Text: task.Name},
+				{Text: task.Status.String()},
+				{Text: task.CreatedAt.Format(time.RFC822)},
+			})
 		}
 	}
+
+	table.Body = &simpletable.Body{Cells: cells}
+	table.SetStyle(simpletable.StyleUnicode)
+	table.Println()
 }
 
 func listTasks(cmd *cobra.Command, args []string) {
@@ -284,7 +310,7 @@ func listTasks(cmd *cobra.Command, args []string) {
 			total := subtaskCount[task.ID].Total
 			percent := 0
 			if total > 0 {
-				percent = int(float64(completed) / float64(total) * 100 + 0.5)
+				percent = int(float64(completed)/float64(total)*100 + 0.5)
 			}
 
 			cells = append(cells, []*simpletable.Cell{

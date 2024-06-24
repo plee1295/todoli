@@ -52,6 +52,19 @@ const (
 
 type Status int
 
+func (s Status) String() string {
+	switch s {
+	case Open:
+		return "Open"
+	case InProgress:
+		return "In Progress"
+	case Completed:
+		return "Completed"
+	default:
+		return "Unknown"
+	}
+}
+
 const (
 	Critical Priority = iota + 1
 	High
