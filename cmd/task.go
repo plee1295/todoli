@@ -190,13 +190,13 @@ func deleteTask(cmd *cobra.Command, args []string) {
 	fmt.Println("\nTask successfully deleted!", task)
 }
 
-func updateTask(cmd *cobra.Command, args []string) {	
+func updateTask(cmd *cobra.Command, args []string) {
 	var tasks []types.Task
 	if err := utils.ReadFromJSON(".tasks.json", &tasks); err != nil {
 		fmt.Println("Error loading tasks:", err)
 		return
 	}
-	
+
 	id := args[0]
 	var task types.Task
 	for _, t := range tasks {
@@ -205,13 +205,100 @@ func updateTask(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	// Todo - Create loop to update multiple properties
 	fmt.Println("Why property would you like to update?")
-	statusChoice, _ := utils.ReadMultipleChoice("Properties", []string{"Name", "Description"})
+	statusChoice, _ := utils.ReadMultipleChoice("Properties", []string{"Name", "Description", "Project", "Parent Task", "Status", "Priority", "Labels"})
 	switch statusChoice {
 	case "Name":
 		task.Name, _ = utils.ReadInput("Task name", task.Name)
+
 	case "Description":
 		task.Description, _ = utils.ReadInput("Task description", task.Description)
+
+	case "Project":
+		var projects []types.Project
+		if err := utils.ReadFromJSON(".projects.json", &projects); err != nil {
+			fmt.Println("Error loading projects:", err)
+			return
+		}
+
+		var projectStrings []string
+		for _, project := range projects {
+			projectStrings = append(projectStrings, project.String())
+		}
+
+		projectChoice, _ := utils.ReadMultipleChoice("Task project", projectStrings)
+		for _, project := range projects {
+			if project.String() == projectChoice {
+				task.ProjectID = project.ID
+				break
+			}
+		}
+
+	case "Parent Task":
+		var allTasks []types.Task
+		if err := utils.ReadFromJSON(".tasks.json", &allTasks); err != nil {
+			fmt.Println("Error reading tasks:", err)
+			return
+		}
+
+		var parentTasks []string
+		for _, task := range allTasks {
+			if task.ParentID == "" {
+				parentTasks = append(parentTasks, task.Name)
+			}
+		}
+
+		if len(parentTasks) == 0 {
+			fmt.Println("No tasks to add subtask to")
+			return
+		}
+
+		parentTaskChoice, _ := utils.ReadMultipleChoice("Choose a parent task", parentTasks)
+		for _, t := range allTasks {
+			if t.Name == parentTaskChoice {
+				task.ParentID = t.ID
+			}
+		}
+
+	case "Status":
+		statusChoice, _ := utils.ReadMultipleChoice("Task status", []string{"Open", "In Progress", "Completed"})
+		switch statusChoice {
+		case "Open":
+			task.Status = types.Open
+		case "In Progress":
+			task.Status = types.InProgress
+		case "Completed":
+			task.Status = types.Completed
+		}
+
+	case "Priority":
+		priorityChoice, _ := utils.ReadMultipleChoice("Task priority", []string{"Critical", "High", "Medium", "Low"})
+		switch priorityChoice {
+		case "Critical":
+			task.Priority = types.Critical
+		case "High":
+			task.Priority = types.High
+		case "Medium":
+			task.Priority = types.Medium
+		case "Low":
+			task.Priority = types.Low
+		}
+
+	case "Labels":
+		var labels []types.Label
+		if err := utils.ReadFromJSON(".labels.json", &labels); err != nil {
+			fmt.Println("Error loading labels:", err)
+			return
+		}
+
+		var labelStrings []string
+		for _, label := range labels {
+			labelStrings = append(labelStrings, label.String())
+		}
+
+		labelChoice, _ := utils.ReadMultipleChoice("Task labels", labelStrings)
+		task.Labels = append(task.Labels, types.Label(labelChoice))
 	}
 
 	for i, t := range tasks {
